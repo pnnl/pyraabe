@@ -4,6 +4,21 @@ import pyraabe
 
 
 def angle(a, b, c):
+    """
+    Computes angle between three points.
+
+    Parameters
+    ----------
+    a, b, c : ndarray
+        Coordinate of each point to form the angle.
+
+    Returns
+    -------
+    angle : float
+        Angle in degrees.
+
+    """
+
     ba = a - b
     bc = c - b
 
@@ -11,10 +26,40 @@ def angle(a, b, c):
 
 
 def arclength(points):
+    """
+    Computes arc length between a sequence of points. Assumes
+    points are ordered.
+
+    Parameters
+    ----------
+    points : ndarray
+        An mxn array of m points over which the arc length is calculated.
+
+    Returns
+    -------
+    length : float
+        Arc length.
+
+    """
+
     return np.sum([np.sum(np.sqrt(np.square(points[i] - points[i + 1]))) for i in range(len(points) - 1)])
 
 
 def generate(infile):
+    """
+    Generates Raabe table from extracted VMTK centerline data.
+
+    Parameters
+    ----------
+    infile : str
+        Path to input VMTK centerline file (.vtp format).
+
+    Returns
+    -------
+    raabe_table : DataFrame
+        Data frame containing Raabe table information.
+
+    """
 
     # iterator to count raabe indices
     class Iterator:
