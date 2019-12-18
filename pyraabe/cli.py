@@ -20,12 +20,17 @@ def main():
     # parse
     args = parser.parse_args()
 
+    # output directory
+    if not os.path.exists(args.outdir):
+        os.makedirs(args.outdir)
+
     # outputs
     basename = os.path.splitext(os.path.basename(args.infile))[0]
     centerline = basename + '_centerline.vtp'
+    raabe = basename + '_raabe.tsv'
 
     # centerline extraction
     pyraabe.centerline.compute(args.infile, centerline)
 
     # raabe generation
-    pyraabe.table.generate(centerline).to_csv(basename + '_raabe.tsv', sep='\t', index=False)
+    pyraabe.table.generate(centerline).to_csv(raabe, sep='\t', index=False)
