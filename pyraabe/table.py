@@ -66,11 +66,11 @@ def generate(infile, gravity_vector=[0, -1, 0]):
     # iterator to count raabe indices
     class Iterator:
         def __init__(self):
-            self.i = 0
+            self.i = 1
 
         def get(self):
             j = str(self.i)
-            self.i += 1
+            self.i -= 1
 
             return j
 
@@ -91,7 +91,7 @@ def generate(infile, gravity_vector=[0, -1, 0]):
     angles = [None for x in range(len(connectivity))]
     gravang = [None for x in range(len(connectivity))]
     lengths = [None for x in range(len(connectivity))]
-    raabe[0] = "0"
+    raabe[0] = "1"
 
     # diameter
     diam = [2 * df.loc[idx, 'MaximumInscribedSphereRadius'].mean() for idx in connectivity]
@@ -139,4 +139,5 @@ def generate(infile, gravity_vector=[0, -1, 0]):
         else:
             angles[i] = np.nan
 
-    return pd.DataFrame({'raabe': raabe, 'bifurcation_angle': angles, 'gravity_angle': gravang, 'diameter': diam, 'length': lengths})
+    res = pd.DataFrame({'raabe': raabe, 'bifurcation_angle': angles, 'gravity_angle': gravang, 'diameter': diam, 'length': lengths})
+    return res[['raabe', 'diameter', 'length', 'bifurcation_angle', 'gravity_angle']]
