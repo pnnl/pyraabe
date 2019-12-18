@@ -74,6 +74,10 @@ def generate(infile, gravity_vector=[0, -1, 0]):
 
             return j
 
+    # check gravity vector
+    if len(gravity_vector) != 3:
+        raise ValueError('gravity vector must be length 3')
+
     # load centerline
     centerline = pyraabe.centerline.read(infile)
 
