@@ -14,8 +14,8 @@ def main():
 
     # args
     parser.add_argument('-v', '--version', action='version', version=pyraabe.__version__, help='print version and exit')
-    parser.add_argument('infile', type=str, help='path to input .stl file with open inlet/outlets')
-    parser.add_argument('outdir', type=str, help='path to output folder')
+    parser.add_argument('infile', type=str, help='path to input .stl file with open inlet/outlets (str)')
+    parser.add_argument('outdir', type=str, help='path to output folder (str)')
     parser.add_argument('-g', '--gravity', nargs='+', type=int, default=[0, -1, 0], help='gravity direction vector (int, default=0 -1 0)')
 
     # parse
