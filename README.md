@@ -4,9 +4,7 @@ PyRaabe is a package to automate [Raabe table](http://mae.engr.ucdavis.edu/wexle
 
 Installation
 ------------
-Use [``conda``](https://www.anaconda.com/download/) to create a virtual environment with required dependencies.
-
-Ensure ``conda`` and ``anaconda-client`` are installed and updated:
+Use [``conda``](https://www.anaconda.com/download/) to create a virtual environment with required dependencies. First, ensure ``conda`` and ``anaconda-client`` are installed and updated:
 ```bash
 conda install anaconda-client
 conda update conda anaconda-client
@@ -38,9 +36,7 @@ Executing PyRaabe is quite simple. After installation, the command ``pyraabe`` w
 ```bash
 pyraabe input.stl output_dir/
 ```
-A VMTK window will appear; simply follow the onscreen instructions to identify inlet and outlets. Specifying the single inlet first will allow all outlets to be defined automatically when prompted.
-
-Both a centerline (.vtp) and Raabe table (.tsv) will be saved to the output directory.
+A VMTK window will appear; simply follow the onscreen instructions to identify inlet and outlets. Specifying the single inlet first will allow all outlets to be defined automatically when prompted. Both a centerline (.vtp) and Raabe table (.tsv) will be saved to the output directory.
 
 Citing PyRaabe
 -------------
