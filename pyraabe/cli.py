@@ -21,6 +21,10 @@ def main():
     # parse
     args = parser.parse_args()
 
+    # check gravity vector
+    if len(args.gravity) != 3:
+        raise ValueError('gravity vector must be length 3')
+
     # output directory
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
