@@ -45,7 +45,7 @@ def arclength(points):
     return np.sum([np.sum(np.sqrt(np.square(points[i] - points[i + 1]))) for i in range(len(points) - 1)])
 
 
-def generate(infile):
+def generate(infile, gravity_vector=[0, -1, 0]):
     """
     Generates Raabe table from extracted VMTK centerline data.
 
@@ -53,6 +53,8 @@ def generate(infile):
     ----------
     infile : str
         Path to input VMTK centerline file (.vtp format).
+    gravity_vector : list
+        Vector definining gravity direction.
 
     Returns
     -------
@@ -73,26 +75,33 @@ def generate(infile):
             return j
 
     # load centerline
-    centerline = pyraabe.utils.read_centerline(infile)
+    centerline = pyraabe.centerline.read(infile)
 
     # parse centerline
-    df = pyraabe.utils.centerline2dataframe(centerline)
+    df = pyraabe.centerline.to_dataframe(centerline)
     connectivity = centerline['CellData']['CellPointIds']
-
-    # diameter
-    diam = [2 * df.loc[idx, 'MaximumInscribedSphereRadius'].mean() for idx in connectivity]
-
-    # length
-    lengths = []
-    for idx in connectivity:
-        points = df.loc[idx, ['x', 'y', 'z']].values
-        lengths.append(arclength(points))
 
     # initialize containers
     queue = [0]
     raabe = [None for x in range(len(connectivity))]
     angles = [None for x in range(len(connectivity))]
+    gravang = [None for x in range(len(connectivity))]
+    lengths = [None for x in range(len(connectivity))]
     raabe[0] = "0"
+
+    # diameter
+    diam = [2 * df.loc[idx, 'MaximumInscribedSphereRadius'].mean() for idx in connectivity]
+
+    # length
+    for i, idx in enumerate(connectivity):
+        points = df.loc[idx, ['x', 'y', 'z']].values
+        lengths[i] = arclength(points)
+
+    # gravity angle
+    for i, idx in enumerate(connectivity):
+        gravang[i] = angle(df.loc[idx[0], ['x', 'y', 'z']] + np.array(gravity_vector),
+                           df.loc[idx[0], ['x', 'y', 'z']],
+                           df.loc[idx[-1], ['x', 'y', 'z']])
 
     while len(queue) > 0:
         # first item in queue
@@ -126,4 +135,4 @@ def generate(infile):
         else:
             angles[i] = np.nan
 
-    return pd.DataFrame({'raabe': raabe, 'bifurcation_angle': angles, 'diameter': diam, 'length': lengths})
+    return pd.DataFrame({'raabe': raabe, 'bifurcation_angle': angles, 'gravity_angle': gravang, 'diameter': diam, 'length': lengths})

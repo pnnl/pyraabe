@@ -32,9 +32,9 @@ pip install git+https://github.com/pnnl/pyraabe
 
 Usage:
 ------
-Executing PyRaabe is quite simple. After installation, the command ``pyraabe`` will become available in your terminal. Usage overview is accessible via ``pyraabe --help`` or ``-h``, but all that needs to be supplied is a path to the input surface (.stl) and a path to the desired output folder. Note that the input surface must be open at the inlet and all outlets.
+Executing PyRaabe is quite simple. After installation, the command ``pyraabe`` will become available in your terminal. Usage overview is accessible via ``pyraabe --help`` or ``-h``, but all that needs to be supplied is a path to the input surface (.stl) and a path to the desired output folder. Gravity direction may be specified, and defaults to [0, -1, 0]. Note that the input surface must be open at the inlet and all outlets.
 ```bash
-pyraabe input.stl output_dir/
+pyraabe input.stl output_dir/ --gravity 0 -1 0
 ```
 A VMTK window will appear; simply follow the onscreen instructions to identify inlet and outlets. Specifying the single inlet first will allow all outlets to be defined automatically when prompted. Both a centerline (.vtp) and Raabe table (.tsv) will be saved to the output directory.
 

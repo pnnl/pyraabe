@@ -16,6 +16,7 @@ def main():
     parser.add_argument('-v', '--version', action='version', version=pyraabe.__version__, help='print version and exit')
     parser.add_argument('infile', type=str, help='path to input .stl file with open inlet/outlets')
     parser.add_argument('outdir', type=str, help='path to output folder')
+    parser.add_argument('-g', '--gravity', nargs='+', type=int, default=[0, -1, 0], help='gravity direction vector (int, default=0 -1 0)')
 
     # parse
     args = parser.parse_args()
@@ -33,4 +34,4 @@ def main():
     pyraabe.centerline.compute(args.infile, centerline)
 
     # raabe generation
-    pyraabe.table.generate(centerline).to_csv(raabe, sep='\t', index=False)
+    pyraabe.table.generate(centerline, gravity_vector=args.gravity).to_csv(raabe, sep='\t', index=False)
