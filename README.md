@@ -40,7 +40,7 @@ A VMTK window will appear; simply follow the onscreen instructions to identify i
 
 Citing PyRaabe
 -------------
-If you would like to reference PyRaabe in an academic paper, we ask you include the following reference:
+If you would like to reference PyRaabe in an academic paper, we ask you include the following:
 * PyRaabe, version 0.1.0 http://github.com/pnnl/pyraabe (accessed MMM YYYY)
 
 Disclaimer
