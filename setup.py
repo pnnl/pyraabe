@@ -10,7 +10,6 @@ with open('LICENSE') as f:
 
 with open('requirements.txt') as f:
     required = f.read().splitlines()
-    required = None
 
 pkgs = find_packages(exclude=('examples', 'docs', 'resources'))
 
