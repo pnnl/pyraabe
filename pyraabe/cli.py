@@ -1,5 +1,6 @@
 import argparse
 import pyraabe
+import os
 
 
 def main():
@@ -19,5 +20,12 @@ def main():
     # parse
     args = parser.parse_args()
 
-    # run
-    pyraabe.centerline.compute(args.infile, args.outdir)
+    # outputs
+    basename = os.path.splitext(os.path.basename(args.infile))[0]
+    centerline = basename + '_centerline.vtp'
+
+    # centerline extraction
+    pyraabe.centerline.compute(args.infile, centerline)
+
+    # raabe generation
+    pyraabe.table.generate(centerline).to_csv(basename + '_raabe.tsv', sep='\t', index=False)
