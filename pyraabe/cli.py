@@ -35,4 +35,4 @@ def main():
     pyraabe.centerline.compute(args.infile, centerline)
 
     # raabe generation
-    pyraabe.table.generate(centerline, gravity_vector=args.gravity).to_csv(raabe, sep='\t', index=False)
+    pyraabe.table.generate(centerline, gravity_vector=args.gravity).to_csv(raabe, sep='\t')

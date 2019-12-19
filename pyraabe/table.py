@@ -1,16 +1,17 @@
 import numpy as np
 import pandas as pd
 import pyraabe
+import math
 
 
-def angle(a, b, c):
+def angle(v1, v2):
     """
-    Computes angle between three points.
+    Computes angle between two vectors.
 
     Parameters
     ----------
-    a, b, c : ndarray
-        Coordinate of each point to form the angle.
+    v1, v2 : ndarray
+        Vectors that form the angle.
 
     Returns
     -------
@@ -19,10 +20,7 @@ def angle(a, b, c):
 
     """
 
-    ba = a - b
-    bc = c - b
-
-    return np.degrees(np.arccos(np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))))
+    return np.degrees(np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))))
 
 
 def arclength(points):
@@ -87,25 +85,28 @@ def generate(infile, gravity_vector=[0, 0, 0]):
 
     # initialize containers
     queue = [0]
-    raabe = [None for x in range(len(connectivity))]
-    angles = [None for x in range(len(connectivity))]
-    gravang = [None for x in range(len(connectivity))]
-    lengths = [None for x in range(len(connectivity))]
-    raabe[0] = "1"
+
+    result = {'raabe': [None for x in range(len(connectivity))],
+              'bifurcation_angle': [0 for x in range(len(connectivity))],
+              'gravity_angle': [None for x in range(len(connectivity))],
+              'length': [None for x in range(len(connectivity))],
+              'diameter': [None for x in range(len(connectivity))],
+              'daughter_branches': [[] for x in range(len(connectivity))]}
+
+    result['raabe'][0] = "1"
 
     # diameter
-    diam = [2 * df.loc[idx, 'MaximumInscribedSphereRadius'].mean() for idx in connectivity]
+    result['diameter'] = [2 * df.loc[idx, 'MaximumInscribedSphereRadius'].mean() for idx in connectivity]
 
     # length
     for i, idx in enumerate(connectivity):
         points = df.loc[idx, ['x', 'y', 'z']].values
-        lengths[i] = arclength(points)
+        result['length'][i] = arclength(points)
 
     # gravity angle
     for i, idx in enumerate(connectivity):
-        gravang[i] = angle(df.loc[idx[0], ['x', 'y', 'z']] + np.array(gravity_vector),
-                           df.loc[idx[0], ['x', 'y', 'z']],
-                           df.loc[idx[-1], ['x', 'y', 'z']])
+        result['gravity_angle'][i] = angle(df.loc[idx[-1], ['x', 'y', 'z']] - df.loc[idx[0], ['x', 'y', 'z']],
+                                           np.array(gravity_vector))
 
     while len(queue) > 0:
         # first item in queue
@@ -118,26 +119,28 @@ def generate(infile, gravity_vector=[0, 0, 0]):
         tmp = []
         for j, y in enumerate(connectivity):
             if x[-1] == y[0]:
-                tmp.append([diam[j], j])
+                tmp.append([result['diameter'][j], j])
 
         # sort by radius (largest first)
         tmp.sort(reverse=True)
 
         # second pass
-        connected = []
         lr = Iterator()
         for d, j in tmp:
+            # add to tree queue
             queue.append(j)
-            connected.append(j)
-            raabe[j] = raabe[i] + lr.get()
 
-        # calculate bifurcation angle
-        if len(connected) > 1:
-            angles[i] = angle(df.loc[connectivity[connected[0]], ['x', 'y', 'z']].values.mean(axis=0),
-                              df.loc[x[-1], ['x', 'y', 'z']].values,
-                              df.loc[connectivity[connected[1]], ['x', 'y', 'z']].values.mean(axis=0))
-        else:
-            angles[i] = np.nan
+            # append daughter connectivity
+            result['daughter_branches'][i].append(j)
 
-    res = pd.DataFrame({'raabe': raabe, 'bifurcation_angle': angles, 'gravity_angle': gravang, 'diameter': diam, 'length': lengths})
-    return res[['raabe', 'diameter', 'length', 'bifurcation_angle', 'gravity_angle']]
+            # update raabe table
+            result['raabe'][j] = result['raabe'][i] + lr.get()
+
+            # calculate bifurcation angle
+            result['bifurcation_angle'][j] = angle(df.loc[connectivity[j][-1], ['x', 'y', 'z']] - df.loc[connectivity[j][0], ['x', 'y', 'z']],
+                                                   df.loc[connectivity[i][-1], ['x', 'y', 'z']] - df.loc[connectivity[i][0], ['x', 'y', 'z']])
+
+    # cast as dataframe
+    result = pd.DataFrame(result)
+    result['approx_volume'] = result['length'] * np.square(result['diameter'] / 2) * np.pi
+    return result[['raabe', 'diameter', 'length', 'bifurcation_angle', 'gravity_angle', 'approx_volume', 'daughter_branches']]
