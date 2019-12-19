@@ -12,7 +12,7 @@ conda update conda anaconda-client
 
 Create the virtual environment:
 ```bash
-conda create -n raabe -c vmtk python=3.6 itk vtk vmtk numpy pandas
+conda create -n raabe -c conda-forge -c anaconda -c vmtk python=3.6 itk vtk vmtk numpy pandas
 ```
 
 Activate the virtual environment:
