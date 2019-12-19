@@ -45,7 +45,7 @@ def arclength(points):
     return np.sum([np.sum(np.sqrt(np.square(points[i] - points[i + 1]))) for i in range(len(points) - 1)])
 
 
-def generate(infile, gravity_vector=[0, -1, 0]):
+def generate(infile, gravity_vector=[0, 0, 0]):
     """
     Generates Raabe table from extracted VMTK centerline data.
 
