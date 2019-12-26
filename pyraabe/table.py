@@ -155,6 +155,6 @@ def generate(infile, gravity_vector=[0, 0, 0], extruded=False):
 
     # nullify extruded section
     if extruded:
-        result.loc[0, ['diameter', 'length', 'approx_volume']] = np.nan
+        result.loc[0, ['diameter', 'length', 'birfurcation_angle', 'gravity_angle', 'approx_volume']] = np.nan
 
     return result[['raabe', 'diameter', 'length', 'bifurcation_angle', 'gravity_angle', 'approx_volume', 'daughter_branches']]
