@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import pyraabe
-import math
 
 
 def angle(v1, v2):
@@ -43,7 +42,7 @@ def arclength(points):
     return np.sum([np.sum(np.sqrt(np.square(points[i] - points[i + 1]))) for i in range(len(points) - 1)])
 
 
-def generate(infile, gravity_vector=[0, 0, 0]):
+def generate(infile, gravity_vector=[0, 0, 0], extruded=False):
     """
     Generates Raabe table from extracted VMTK centerline data.
 
@@ -53,6 +52,8 @@ def generate(infile, gravity_vector=[0, 0, 0]):
         Path to input VMTK centerline file (.vtp format).
     gravity_vector : list
         Vector definining gravity direction.
+    extruded : bool
+        Signals whether the inlet was artificially extruded.
 
     Returns
     -------
@@ -96,12 +97,14 @@ def generate(infile, gravity_vector=[0, 0, 0]):
     result['raabe'][0] = "1"
 
     # diameter
-    result['diameter'] = [2 * df.loc[idx, 'MaximumInscribedSphereRadius'].mean() for idx in connectivity]
+    result['diameter'] = [2 * df.loc[idx[2:], 'MaximumInscribedSphereRadius'].median() for idx in connectivity]
 
     # length
     for i, idx in enumerate(connectivity):
         points = df.loc[idx, ['x', 'y', 'z']].values
         result['length'][i] = arclength(points)
+        if i > 0:
+            result['length'][i] = result['length'][i] - df.loc[idx[0], 'MaximumInscribedSphereRadius']
 
     # gravity angle
     for i, idx in enumerate(connectivity):
@@ -140,7 +143,18 @@ def generate(infile, gravity_vector=[0, 0, 0]):
             result['bifurcation_angle'][j] = angle(df.loc[connectivity[j][-1], ['x', 'y', 'z']] - df.loc[connectivity[j][0], ['x', 'y', 'z']],
                                                    df.loc[connectivity[i][-1], ['x', 'y', 'z']] - df.loc[connectivity[i][0], ['x', 'y', 'z']])
 
+        # sort daughter indices
+        result['daughter_branches'][i].sort()
+
+    # terminal branches
+    result['daughter_branches'] = [x if x != [] else np.nan for x in result['daughter_branches']]
+
     # cast as dataframe
     result = pd.DataFrame(result)
     result['approx_volume'] = result['length'] * np.square(result['diameter'] / 2) * np.pi
+
+    # nullify extruded section
+    if extruded:
+        result.loc[0, ['diameter', 'length', 'approx_volume']] = np.nan
+
     return result[['raabe', 'diameter', 'length', 'bifurcation_angle', 'gravity_angle', 'approx_volume', 'daughter_branches']]
