@@ -1,6 +1,6 @@
 PyRaabe
 =======
-PyRaabe is a package to automate [Raabe table](http://mae.engr.ucdavis.edu/wexler/lungs/LF53-Raabe/text.pdf) generation from a triangulated surface of an airway geometry. It relies heavily on the [Vascular Modeling Toolkit (VMTK)](http://www.vmtk.org/index.html) to extract a centerline from the 3D surface mesh and and subsequently computes the relevant attributes for the Raabe table, including length, diameter, bifurcation angle, and gravity angle.
+PyRaabe is a package to automate [Raabe table](http://mae.engr.ucdavis.edu/wexler/lungs/LF53-Raabe/text.pdf) generation from a triangulated surface of an airway geometry. It relies heavily on the [Vascular Modeling Toolkit (VMTK)](http://www.vmtk.org/index.html) to extract a centerline from the 3D surface mesh and subsequently computes the relevant attributes for the Raabe table, including length, diameter, bifurcation angle, and gravity angle.
 
 Installation
 ------------
