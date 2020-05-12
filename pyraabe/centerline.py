@@ -29,6 +29,7 @@ def compute(infile, outfile):
     centerline = vmtkscripts.vmtkCenterlines()
     centerline.Surface = centerlineReader.Surface
     centerline.SeedSelectorName = 'openprofiles'
+    centerline.AppendEndPoints = 1
     centerline.Execute()
 
     # extract branches
