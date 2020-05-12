@@ -1,5 +1,4 @@
 import subprocess
-from pkg_resources import resource_filename
 import pandas as pd
 from vmtk import vmtkscripts
 
@@ -22,7 +21,9 @@ def compute(infile, outfile):
     """
 
     # compute centerline
-    subprocess.call([resource_filename('pyraabe', 'shell/centerline.sh'), infile, outfile])
+    cmd = "vmtkcenterlines -ifile {} -seedselector openprofiles -endpoints 1 \
+           --pipe vmtkbranchextractor --pipe vmtkcenterlinemerge -ofile {}"
+    subprocess.call(cmd.format(infile, outfile), shell=True)
 
 
 def read(infile):
