@@ -20,10 +20,32 @@ def compute(infile, outfile):
 
     """
 
-    # compute centerline
-    cmd = "vmtkcenterlines -ifile {} -seedselector openprofiles -endpoints 1 \
-           --pipe vmtkbranchextractor --pipe vmtkcenterlinemerge -ofile {}"
-    subprocess.call(cmd.format(infile, outfile), shell=True)
+    # read surface
+    centerlineReader = vmtkscripts.vmtkSurfaceReader()
+    centerlineReader.InputFileName = infile
+    centerlineReader.Execute()
+
+    # centerline
+    centerline = vmtkscripts.vmtkCenterlines()
+    centerline.Surface = centerlineReader.Surface
+    centerline.SeedSelectorName = 'openprofiles'
+    centerline.Execute()
+
+    # extract branches
+    branchExtractor = vmtkscripts.vmtkBranchExtractor()
+    branchExtractor.Centerlines = centerline.Centerlines
+    branchExtractor.Execute()
+
+    # merge centerlines
+    centerlineMerge = vmtkscripts.vmtkCenterlineMerge()
+    centerlineMerge.Centerlines = branchExtractor.Centerlines
+    centerlineMerge.Execute()
+
+    # write surface
+    centerlineWriter = vmtkscripts.vmtkSurfaceWriter()
+    centerlineWriter.OutputFileName = outfile
+    centerlineWriter.Surface = centerlineMerge.Centerlines
+    centerlineWriter.Execute()
 
 
 def read(infile):
@@ -42,13 +64,17 @@ def read(infile):
 
     """
 
+    # read surface
     centerlineReader = vmtkscripts.vmtkSurfaceReader()
     centerlineReader.InputFileName = infile
     centerlineReader.Execute()
+
+    # numpy adaptor
     clNumpyAdaptor = vmtkscripts.vmtkCenterlinesToNumpy()
     clNumpyAdaptor.Centerlines = centerlineReader.Surface
     clNumpyAdaptor.ConvertCellToPoint = 1
     clNumpyAdaptor.Execute()
+
     return clNumpyAdaptor.ArrayDict
 
 
