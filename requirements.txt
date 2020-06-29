@@ -3,3 +3,4 @@ vtk
 vmtk
 pandas
 numpy
+scipy

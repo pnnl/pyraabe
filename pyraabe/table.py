@@ -42,14 +42,14 @@ def arclength(points):
     return np.sum([np.sum(np.sqrt(np.square(points[i] - points[i + 1]))) for i in range(len(points) - 1)])
 
 
-def generate(infile, gravity_vector=[0, 0, 0], extruded=False):
+def generate(centerline, gravity_vector=[0, 0, 0], extruded=False):
     """
     Generates Raabe table from extracted VMTK centerline data.
 
     Parameters
     ----------
-    infile : str
-        Path to input VMTK centerline file (.vtp format).
+    centerline : dict
+        Centerline loaded from VTP file.
     gravity_vector : list
         Vector definining gravity direction.
     extruded : bool
@@ -77,9 +77,6 @@ def generate(infile, gravity_vector=[0, 0, 0], extruded=False):
     if len(gravity_vector) != 3:
         raise ValueError('gravity vector must be length 3')
 
-    # load centerline
-    centerline = pyraabe.centerline.read(infile)
-
     # parse centerline
     df = pyraabe.centerline.to_dataframe(centerline)
     connectivity = centerline['CellData']['CellPointIds']
@@ -92,7 +89,8 @@ def generate(infile, gravity_vector=[0, 0, 0], extruded=False):
               'gravity_angle': [None for x in range(len(connectivity))],
               'length': [None for x in range(len(connectivity))],
               'diameter': [None for x in range(len(connectivity))],
-              'daughter_branches': [[] for x in range(len(connectivity))]}
+              'daughter_branches': [[] for x in range(len(connectivity))],
+              'endpoint_idx': [None for x in range(len(connectivity))]}
 
     result['raabe'][0] = "1"
 
@@ -105,6 +103,9 @@ def generate(infile, gravity_vector=[0, 0, 0], extruded=False):
         result['length'][i] = arclength(points)
         if i > 0:
             result['length'][i] = result['length'][i] - df.loc[idx[0], 'MaximumInscribedSphereRadius']
+
+        # endpoint index
+        result['endpoint_idx'][i] = connectivity[i][-1]
 
     # gravity angle
     for i, idx in enumerate(connectivity):
@@ -157,4 +158,59 @@ def generate(infile, gravity_vector=[0, 0, 0], extruded=False):
     if extruded:
         result.loc[0, ['diameter', 'length', 'bifurcation_angle', 'gravity_angle', 'approx_volume']] = np.nan
 
-    return result[['raabe', 'diameter', 'length', 'bifurcation_angle', 'gravity_angle', 'approx_volume', 'daughter_branches']]
+    return result[['raabe', 'diameter', 'length', 'bifurcation_angle', 'gravity_angle', 'approx_volume', 'daughter_branches', 'endpoint_idx']]
+
+
+def merge(parent, children, gravity_vector=[0, 1, 0], extruded=False):
+    """
+    Generates merged Raabe table from multiple extracted VMTK centerline data.
+
+    Parameters
+    ----------
+    parent : dict
+        Parent centerline loaded from VTP file.
+    children : list of dicts
+        Child centerlines loaded from VTP file.
+    gravity_vector : list
+        Vector definining gravity direction.
+    extruded : bool
+        Signals whether the inlet was artificially extruded.
+
+    Returns
+    -------
+    raabe_table : DataFrame
+        Data frame containing merged Raabe table information.
+    all_tables : list of DataFrames
+        Individual Raabe tables.
+
+    """
+
+    all_tables = []
+
+    parent_ctrline = pyraabe.centerline.read(parent)
+    parent_raabe = generate(parent_ctrline, gravity_vector=gravity_vector, extruded=extruded)
+
+    all_tables.append(parent_raabe.copy())
+
+    for child in children:
+        child_ctrline = pyraabe.centerline.read(child)
+        child_raabe = generate(child_ctrline, gravity_vector=gravity_vector, extruded=extruded)
+
+        all_tables.append(child_raabe.copy())
+
+        child_raabe['endpoint_idx'] = np.nan
+
+        idx, coord = pyraabe.centerline.match(parent_ctrline, child_ctrline)
+        prefix = parent_raabe.loc[parent_raabe['endpoint_idx'] == idx, 'raabe'].values[0]
+        a = parent_raabe.loc[parent_raabe['endpoint_idx'] == idx, 'bifurcation_angle'].values[0]
+        n = len(parent_raabe.index)
+
+        child_raabe.loc[0, 'bifurcation_angle'] = a
+        child_raabe['raabe'] = child_raabe['raabe'].str[1:]
+        child_raabe['raabe'] = prefix + child_raabe['raabe']
+        child_raabe.index += n
+        child_raabe['daughter_branches'] = [(np.array(x) + n).tolist() for x in child_raabe['daughter_branches']]
+
+        parent_raabe = pd.concat((parent_raabe, child_raabe), axis=0)
+
+    return parent_raabe, all_tables
