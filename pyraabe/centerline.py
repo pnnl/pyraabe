@@ -1,4 +1,3 @@
-import subprocess
 import pandas as pd
 from vmtk import vmtkscripts
 
