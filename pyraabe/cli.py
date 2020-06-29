@@ -48,6 +48,8 @@ def main():
         # centerline extraction
         if not os.path.exists(centerline_path):
             pyraabe.centerline.compute(infile, centerline_path)
+        else:
+            print('{} already exists. Skipping centerline calculation.'.format(centerline_path))
 
     # merge
     if len(centerline_paths) > 1:
