@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pyraabe
+import os
 
 
 def angle(v1, v2):
@@ -192,6 +193,8 @@ def merge(parent, children, gravity_vector=[0, 1, 0], extruded=False):
 
     all_tables.append(parent_raabe.copy())
 
+    parent_raabe['source'] = os.path.basename(parent).split('_', 1)[0]
+
     for child in children:
         child_ctrline = pyraabe.centerline.read(child)
         child_raabe = generate(child_ctrline, gravity_vector=gravity_vector, extruded=extruded)
@@ -199,6 +202,7 @@ def merge(parent, children, gravity_vector=[0, 1, 0], extruded=False):
         all_tables.append(child_raabe.copy())
 
         child_raabe['endpoint_idx'] = np.nan
+        child_raabe['source'] = os.path.basename(child).split('_', 1)[0]
 
         idx, coord = pyraabe.centerline.match(parent_ctrline, child_ctrline)
         prefix = parent_raabe.loc[parent_raabe['endpoint_idx'] == idx, 'raabe'].values[0]
