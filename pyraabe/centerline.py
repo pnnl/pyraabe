@@ -67,6 +67,7 @@ def read(infile):
     """
 
     # read surface
+    print()
     centerlineReader = vmtkscripts.vmtkSurfaceReader()
     centerlineReader.InputFileName = infile
     centerlineReader.Execute()
