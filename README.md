@@ -12,12 +12,12 @@ conda update conda anaconda-client
 
 Create the virtual environment:
 ```bash
-conda create -n raabe -c conda-forge -c anaconda -c vmtk python=3.6 itk vtk vmtk numpy pandas
+conda create -n pyraabe -c vmtk -c conda-forge python=3.6 itk vtk vmtk numpy scipy pandas
 ```
 
 Activate the virtual environment:
 ```
-conda activate raabe
+conda activate pyraabe
 ```
 
 Install PyRaabe using [``pip``](https://pypi.org/project/pip/):
